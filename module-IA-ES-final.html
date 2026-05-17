@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA Générative & Pratiques ES</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ind:#2B2393;--ind-dark:#1A1564;--ind-light:#EEE9FF;--ind-mid:#7B72D6;
+  --teal:#0B6B54;--teal-light:#E0F5EE;--teal-mid:#4DB89A;
+  --amber:#E8920A;--amber-light:#FFF3CD;
+  --coral:#E8533A;--coral-light:#FDECE8;
+  --rose:#C0385A;--rose-light:#FCE4EC;
+  --sky:#0284C7;--sky-light:#E0F2FE;
+  --gray-50:#F8F8FF;--gray-100:#EEEEF8;--gray-200:#D4D4E8;--gray-500:#8080A0;--gray-700:#3C3C5C;--gray-900:#1A1A2E;
+  --white:#FFFFFF;--bg:#F8F8FF;--border:#DDDDF0;
+  --font:'Outfit',sans-serif;--serif:'Lora',serif;
+  --shadow-ind:0 8px 32px rgba(43,35,147,0.18);
+  --shadow-card:0 4px 20px rgba(0,0,0,0.07);
+  --r:16px;--r-sm:10px;--r-pill:100px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:var(--gray-900);font-size:15px;line-height:1.7;min-height:100vh;}
+p,li{text-align:justify;}
+
+.hero{position:relative;overflow:hidden;padding:4rem 2rem 3rem;background:linear-gradient(135deg,#1A1564 0%,#2B2393 45%,#4338CA 100%);color:white;}
+.hero-blob{position:absolute;border-radius:60% 40% 30% 70%/60% 30% 70% 40%;animation:blob 8s ease-in-out infinite;opacity:.15;}
+.hero-blob.b1{width:300px;height:300px;background:white;top:-80px;right:-60px;animation-delay:0s;}
+.hero-blob.b2{width:180px;height:180px;background:#A5B4FC;bottom:-40px;left:10%;animation-delay:3s;}
+.hero-blob.b3{width:130px;height:130px;background:#fff;top:55%;right:12%;animation-delay:5s;}
+@keyframes blob{0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%;}50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%;}}
+.hero-inner{position:relative;z-index:1;max-width:860px;margin:0 auto;}
+.hero-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:var(--r-pill);padding:5px 14px;font-size:11.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1.25rem;backdrop-filter:blur(8px);}
+.hero h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;line-height:1.1;letter-spacing:-.03em;margin-bottom:.5rem;}
+.hero h1 em{font-style:normal;opacity:.75;font-weight:400;display:block;font-size:.55em;letter-spacing:.01em;margin-top:.3rem;}
+.hero-desc{font-size:14.5px;color:rgba(255,255,255,.75);max-width:580px;margin-bottom:2rem;text-align:left;}
+.hero-chips{display:flex;gap:10px;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:var(--r-pill);padding:6px 14px;font-size:12px;font-weight:500;backdrop-filter:blur(6px);}
+
+.nav-wrap{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(43,35,147,.08);}
+.progress-line{height:3px;background:linear-gradient(90deg,var(--ind),var(--ind-mid));transition:width .5s ease;width:20%;}
+.nav-tabs{max-width:860px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none;gap:4px;padding:6px 12px;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-btn{flex-shrink:0;padding:7px 16px;font-size:12px;font-weight:600;font-family:var(--font);border:none;background:none;color:var(--gray-500);border-radius:var(--r-pill);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.nav-btn:hover{background:var(--ind-light);color:var(--ind);}
+.nav-btn.active{background:var(--ind);color:var(--white);box-shadow:0 2px 10px rgba(43,35,147,.35);}
+.nav-btn.done{color:var(--teal);background:var(--teal-light);}
+.nav-btn.done::before{content:'✓ ';}
+
+.main{max-width:860px;margin:0 auto;padding:2.5rem 1.5rem 5rem;}
+.chapter{display:none;animation:fadeUp .4s ease;}
+.chapter.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+.ch-header{display:flex;align-items:center;gap:16px;margin-bottom:2rem;padding:1.5rem;background:linear-gradient(135deg,var(--ind-light),var(--white));border-radius:var(--r);border:1px solid var(--border);}
+.ch-num{width:60px;height:60px;min-width:60px;background:var(--ind);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:white;box-shadow:0 4px 16px rgba(43,35,147,.4);flex-shrink:0;}
+.ch-titles h2{font-size:1.4rem;font-weight:800;color:var(--gray-900);line-height:1.2;margin-bottom:3px;}
+.ch-titles p{font-size:13px;color:var(--gray-500);font-style:italic;}
+
+.prose{color:var(--gray-700);line-height:1.8;margin-bottom:1.5rem;text-align:justify;}
+.prose strong{color:var(--gray-900);font-weight:700;}
+.sec-title{font-size:1rem;font-weight:800;color:var(--gray-900);margin:2rem 0 .9rem;display:flex;align-items:center;gap:8px;}
+.sec-title::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,var(--ind-light),transparent);border-radius:2px;}
+
+.callout{border-radius:var(--r);padding:1.1rem 1.3rem;margin-bottom:1.25rem;position:relative;overflow:hidden;}
+.callout::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;}
+.callout-teal{background:var(--teal-light);border:1px solid #B2DFDB;}
+.callout-teal::before{background:var(--teal);}
+.callout-teal .c-label{color:var(--teal);}
+.callout-ind{background:var(--ind-light);border:1px solid #C5BFFF;}
+.callout-ind::before{background:var(--ind);}
+.callout-ind .c-label{color:var(--ind-dark);}
+.callout-amber{background:var(--amber-light);border:1px solid #FFD54F;}
+.callout-amber::before{background:var(--amber);}
+.callout-amber .c-label{color:var(--amber);}
+.callout-coral{background:var(--coral-light);border:1px solid #FFAB91;}
+.callout-coral::before{background:var(--coral);}
+.callout-coral .c-label{color:var(--coral);}
+.c-label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;}
+.callout p{font-size:14px;color:var(--gray-700);text-align:justify;}
+.callout p strong{color:var(--gray-900);}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:1.75rem;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;transition:transform .2s,box-shadow .2s;cursor:default;}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-card);}
+.card-ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:.85rem;font-size:20px;}
+.card h3{font-size:13.5px;font-weight:700;margin-bottom:.35rem;color:var(--gray-900);}
+.card p{font-size:12.5px;color:var(--gray-500);line-height:1.55;text-align:left;}
+
+.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0;margin-bottom:1.75rem;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);}
+.type-cell{padding:1.1rem 1.3rem;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);margin:-1px;}
+.type-cell:nth-child(1){background:#F5F3FF;}
+.type-cell:nth-child(2){background:#F0FDF9;}
+.type-cell:nth-child(3){background:#FFFBF0;}
+.type-cell:nth-child(4){background:#F0F4FF;}
+.type-ico{font-size:22px;flex-shrink:0;margin-top:2px;}
+.type-cell h4{font-size:13px;font-weight:700;margin-bottom:3px;color:var(--gray-900);}
+.type-cell p{font-size:12.5px;color:var(--gray-500);line-height:1.5;text-align:left;}
+
+.accordion-item{border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px;overflow:hidden;}
+.acc-btn{width:100%;text-align:left;padding:12px 16px;font-size:14px;font-weight:600;font-family:var(--font);color:var(--gray-900);background:var(--white);border:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background .15s;}
+.acc-btn:hover{background:var(--ind-light);}
+.acc-arrow{font-size:12px;transition:transform .25s;color:var(--gray-500);}
+.acc-btn.open .acc-arrow{transform:rotate(180deg);}
+.acc-body{display:none;padding:0 16px 14px;font-size:13.5px;color:var(--gray-700);line-height:1.7;text-align:justify;}
+.acc-body.open{display:block;}
+.acc-body p{margin-bottom:.5rem;}
+
+.resources{display:flex;flex-direction:column;gap:8px;margin-bottom:1.75rem;}
+.res-card{display:flex;align-items:center;gap:12px;padding:11px 15px;background:var(--white);border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:all .2s;}
+.res-card:hover{border-color:var(--ind-mid);background:var(--ind-light);transform:translateX(4px);}
+.res-ico{width:34px;height:34px;min-width:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.res-ico.vid{background:#FFEBEE;}
+.res-ico.pod{background:#EDE7F6;}
+.res-ico.lnk{background:#FFF9C4;}
+.res-ico.mooc{background:#E8F5E9;}
+.res-ico.tool{background:#EEE9FF;}
+.res-info{flex:1;min-width:0;}
+.res-title{font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.res-sub{font-size:11px;color:var(--gray-500);}
+.res-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:var(--r-pill);white-space:nowrap;flex-shrink:0;}
+.rb-acad{background:#E3F2FD;color:#1565C0;}
+.rb-pro{background:var(--teal-light);color:var(--teal);}
+.rb-tool{background:var(--ind-light);color:var(--ind-dark);}
+
+.scenario-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:1.75rem;box-shadow:var(--shadow-card);}
+.scenario-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.sc-tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:4px 12px;border-radius:var(--r-pill);background:var(--ind-light);color:var(--ind-dark);}
+.sc-tag.ok{background:var(--teal-light);color:var(--teal);}
+.sc-tag.warn{background:#FFF3E0;color:#E65100;}
+.sc-controls{display:flex;align-items:center;gap:8px;}
+.btn-play{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:var(--ind);color:white;border:none;border-radius:var(--r-pill);font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(43,35,147,.3);}
+.btn-play:hover{background:var(--ind-dark);transform:scale(1.03);}
+.btn-reset{display:inline-flex;align-items:center;gap:4px;padding:7px 12px;background:none;color:var(--gray-500);border:1px solid var(--gray-200);border-radius:var(--r-pill);font-size:12px;font-family:var(--font);cursor:pointer;transition:all .15s;}
+.btn-reset:hover{color:var(--gray-900);border-color:var(--gray-500);}
+.sc-step{font-size:11px;color:var(--gray-500);}
+
+.dialogue{padding:1.25rem;display:flex;flex-direction:column;gap:14px;min-height:180px;}
+.brow{display:flex;align-items:flex-end;gap:10px;opacity:0;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease;}
+.brow.visible{opacity:1;transform:translateY(0);}
+.brow.r{flex-direction:row-reverse;}
+.av{width:38px;height:38px;min-width:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
+.av.es{background:linear-gradient(135deg,var(--ind-light),var(--ind-mid));color:var(--ind-dark);}
+.av.ia{background:linear-gradient(135deg,var(--amber-light),#FFD54F);color:#7B4F00;}
+.av.check{background:linear-gradient(135deg,var(--teal-light),var(--teal-mid));color:var(--teal);}
+.av.warn{background:linear-gradient(135deg,#FFF3E0,#FFAB91);color:#BF360C;}
+.bubble{max-width:76%;padding:10px 14px;border-radius:16px;font-size:13.5px;line-height:1.6;}
+.bn{font-size:10px;color:var(--gray-500);margin-bottom:4px;font-weight:600;}
+.bl{background:var(--gray-100);border:1px solid var(--gray-200);border-bottom-left-radius:4px;color:var(--gray-700);}
+.br{background:linear-gradient(135deg,var(--ind-light),#D6D0FF);border:1px solid var(--ind-mid);border-bottom-right-radius:4px;color:var(--ind-dark);}
+.bw{background:linear-gradient(135deg,#FFF8E1,#FFE082);border:1px solid #FFD54F;border-bottom-left-radius:4px;color:#5D4037;}
+.ba{background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border:1px solid #FFCC80;border-bottom-left-radius:4px;color:#4E342E;}
+.bcheck{background:linear-gradient(135deg,var(--teal-light),#B2DFDB);border:1px solid var(--teal-mid);border-bottom-left-radius:4px;color:var(--teal);}
+.bubble strong{font-weight:700;}
+
+.analysis{display:none;padding:1rem 1.25rem;background:linear-gradient(135deg,#F9FBE7,#F0F7F4);border-top:1px solid var(--border);}
+.analysis.show{display:block;}
+.analysis h4{font-size:13px;font-weight:800;color:var(--teal);margin-bottom:.75rem;}
+.a-item{display:flex;gap:8px;font-size:13px;color:var(--gray-700);margin-bottom:.5rem;line-height:1.55;text-align:justify;}
+.dot-ok{width:7px;height:7px;min-width:7px;border-radius:50%;background:var(--teal-mid);margin-top:7px;}
+.dot-warn{width:7px;height:7px;min-width:7px;border-radius:50%;background:var(--amber);margin-top:7px;}
+.dot-no{width:7px;height:7px;min-width:7px;border-radius:50%;background:var(--coral);margin-top:7px;}
+
+.comparia{background:linear-gradient(135deg,#EDE7F6,var(--ind-light));border:1px solid #CE93D8;border-radius:var(--r);padding:1.5rem;margin-bottom:1.75rem;}
+.comp-head{display:flex;align-items:center;gap:12px;margin-bottom:1rem;}
+.comp-ico{width:46px;height:46px;background:linear-gradient(135deg,#7B1FA2,#AB47BC);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:white;flex-shrink:0;}
+.comp-head h3{font-size:15px;font-weight:800;color:#4A148C;}
+.comp-head p{font-size:12px;color:var(--gray-500);margin-top:2px;}
+.comp-intro{font-size:13.5px;color:var(--gray-700);margin-bottom:1rem;line-height:1.7;text-align:justify;}
+.comp-prompt{background:white;border:1px solid #CE93D8;border-radius:var(--r-sm);padding:12px 15px;margin-bottom:12px;}
+.comp-plabel{font-size:10px;font-weight:800;color:#7B1FA2;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
+.comp-prompt p{font-size:13.5px;color:var(--gray-700);line-height:1.6;font-style:italic;text-align:justify;}
+.comp-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:linear-gradient(135deg,#7B1FA2,#AB47BC);color:white;border:none;border-radius:var(--r-pill);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 3px 12px rgba(123,31,162,.3);}
+.comp-btn:hover{transform:translateY(-2px);box-shadow:0 5px 18px rgba(123,31,162,.4);}
+.comp-consigne{font-size:13px;color:var(--gray-700);margin-top:.9rem;line-height:1.7;text-align:justify;}
+.comp-consigne strong{color:#4A148C;font-weight:700;}
+
+.data-table{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:1.75rem;font-size:13.5px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);}
+.data-table th{text-align:left;padding:10px 14px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-700);background:var(--gray-50);border-bottom:1px solid var(--border);}
+.data-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--gray-700);line-height:1.55;text-align:justify;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table td:first-child{font-weight:700;color:var(--gray-900);width:32%;background:#FAFAFE;}
+
+.quiz{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.75rem;box-shadow:var(--shadow-card);}
+.quiz-q{font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:1.1rem;line-height:1.5;}
+.quiz-opts{display:flex;flex-direction:column;gap:9px;}
+.quiz-opt{display:flex;align-items:flex-start;gap:10px;padding:11px 15px;border:2px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:all .15s;font-size:14px;color:var(--gray-700);background:none;text-align:left;font-family:var(--font);line-height:1.5;width:100%;}
+.quiz-opt:hover:not(.disabled){border-color:var(--ind-mid);background:var(--ind-light);color:var(--gray-900);transform:translateX(3px);}
+.quiz-opt.correct{border-color:var(--teal);background:var(--teal-light);color:var(--teal);}
+.quiz-opt.wrong{border-color:var(--coral);background:var(--coral-light);color:var(--coral);}
+.quiz-opt.disabled{cursor:not-allowed;}
+.quiz-fb{margin-top:1rem;font-size:13.5px;padding:11px 15px;border-radius:var(--r-sm);display:none;line-height:1.6;text-align:justify;}
+.quiz-fb.show{display:block;}
+.quiz-fb.ok{background:var(--teal-light);color:var(--teal);border-left:4px solid var(--teal-mid);}
+.quiz-fb.ko{background:var(--coral-light);color:var(--coral);border-left:4px solid var(--coral);}
+
+.blocs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.75rem;}
+@media(max-width:560px){.blocs{grid-template-columns:1fr;}}
+.bloc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;border-top:4px solid var(--ind);}
+.bloc-num{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ind);margin-bottom:.4rem;}
+.bloc h4{font-size:13.5px;font-weight:700;margin-bottom:.4rem;color:var(--gray-900);}
+.bloc p{font-size:12.5px;color:var(--gray-500);line-height:1.5;text-align:left;}
+
+.reflect{border:2px dashed var(--ind-mid);border-radius:var(--r);padding:1.25rem;margin-bottom:1.75rem;}
+.reflect-head{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ind);margin-bottom:.7rem;display:flex;align-items:center;gap:6px;}
+.reflect-sub{font-size:13px;color:var(--gray-500);margin-bottom:.7rem;font-style:italic;}
+.reflect textarea{width:100%;border:1.5px solid var(--border);border-radius:var(--r-sm);padding:10px 13px;font-size:13.5px;font-family:var(--font);color:var(--gray-900);background:var(--bg);resize:vertical;min-height:80px;line-height:1.65;transition:border .2s;}
+.reflect textarea:focus{outline:none;border-color:var(--ind-mid);}
+.reflect textarea::placeholder{color:var(--gray-500);font-style:italic;}
+
+.score-area{text-align:center;padding:2.5rem 1rem 1.5rem;}
+.score-ring{position:relative;width:130px;height:130px;margin:0 auto 1.5rem;}
+.score-ring svg{width:130px;height:130px;transform:rotate(-90deg);}
+.score-ring circle{fill:none;stroke-width:8;}
+.score-bg{stroke:var(--gray-200);}
+.score-fg{stroke:var(--ind);stroke-dasharray:339;stroke-dashoffset:339;stroke-linecap:round;transition:stroke-dashoffset 1s ease;}
+.score-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-num{font-size:2.8rem;font-weight:900;color:var(--ind);line-height:1;}
+.score-den{font-size:13px;color:var(--gray-500);}
+.score-msg{font-size:14.5px;color:var(--gray-700);max-width:420px;margin:0 auto 2rem;line-height:1.7;text-align:center;}
+.synth-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-100);font-size:14px;color:var(--gray-700);text-align:justify;}
+.synth-item:last-child{border:none;}
+.synth-dot{width:9px;height:9px;min-width:9px;border-radius:50%;background:var(--ind);margin-top:6px;}
+
+.ch-nav{display:flex;justify-content:space-between;align-items:center;padding-top:2rem;border-top:1px solid var(--border);margin-top:2rem;}
+.btn-nav{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:var(--r-pill);font-size:13.5px;font-weight:700;cursor:pointer;border:none;font-family:var(--font);transition:all .2s;}
+.btn-next{background:var(--ind);color:white;box-shadow:0 3px 14px rgba(43,35,147,.35);}
+.btn-next:hover{background:var(--ind-dark);transform:translateY(-2px);box-shadow:var(--shadow-ind);}
+.btn-prev{background:none;color:var(--gray-700);border:2px solid var(--gray-200);}
+.btn-prev:hover{background:var(--gray-100);}
+
+ul.sl{padding-left:1.4rem;margin-bottom:1.5rem;}
+ul.sl li{font-size:14px;color:var(--gray-700);margin-bottom:.45rem;line-height:1.65;text-align:justify;}
+ul.sl li strong{color:var(--gray-900);font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-blob b1"></div><div class="hero-blob b2"></div><div class="hero-blob b3"></div>
+  <div class="hero-inner">
+    <div class="hero-pill">🎓 Formation initiale · ES · Réforme octobre 2025</div>
+    <h1>Intelligence artificielle générative<em>& pratiques de l'Éducateur·rice Spécialisé·e</em></h1>
+    <div class="hero-desc">Module de découverte — MECS · IME · CHRS · Protection de l'enfance · Insertion sociale</div>
+    <div class="hero-chips">
+      <div class="chip">🕐 45 min environ</div>
+      <div class="chip">📚 5 chapitres</div>
+      <div class="chip">🎬 Vidéos · Podcasts · Animations</div>
+      <div class="chip">🧪 Outil interactif</div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-wrap">
+  <div class="progress-line" id="pbar"></div>
+  <div class="nav-tabs">
+    <button class="nav-btn active" onclick="go(0)">1 · Qu'est-ce que l'IA ?</button>
+    <button class="nav-btn" onclick="go(1)">2 · Opportunités ES</button>
+    <button class="nav-btn" onclick="go(2)">3 · Risques éthiques</button>
+    <button class="nav-btn" onclick="go(3)">4 · Posture pro</button>
+    <button class="nav-btn" onclick="go(4)">5 · Bilan</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════ CHAPITRE 1 ═══════ -->
+<div class="chapter active" id="ch0">
+  <div class="ch-header">
+    <div class="ch-num">1</div>
+    <div class="ch-titles"><h2>Comprendre l'intelligence artificielle générative</h2><p>Démystifier avant de s'approprier</p></div>
+  </div>
+
+  <p class="prose">L'IA générative est omniprésente dans l'actualité, mais de quoi s'agit-il vraiment ? Avant de réfléchir à ses usages dans votre future pratique professionnelle, prenons le temps de comprendre ce que c'est — et ce que ce n'est pas.</p>
+
+  <div class="sec-title">▶ Commencer par regarder</div>
+  <div class="resources">
+    <div class="res-card" onclick="openLink('https://www.youtube.com/watch?v=yQLmgw3rClM')">
+      <div class="res-ico vid">▶️</div>
+      <div class="res-info"><div class="res-title">Vidéo — C'est quoi l'intelligence artificielle ? · Découvrir #1</div><div class="res-sub">Class'Code / FUN MOOC · YouTube · ~8 min · Accessible à tous</div></div>
+      <span class="res-badge rb-acad">Académique</span>
+    </div>
+  </div>
+
+  <div class="callout callout-teal">
+    <div class="c-label">Définition — source : Inria / Class'Code</div>
+    <p>Une <strong>IA générative</strong> est un système informatique capable de produire du contenu nouveau (texte, image, audio) en se basant sur des milliards de données sur lesquelles il a été entraîné. Il ne comprend pas, ne ressent pas : il <strong>prédit statistiquement</strong> ce qui est le plus probable de suivre. (Inria, MOOC Class'Code IAI, FUN MOOC)</p>
+  </div>
+
+  <div class="sec-title">Les grands types d'IA génératives</div>
+  <div class="type-grid">
+    <div class="type-cell"><div class="type-ico">💬</div><div><h4>Chatbots de texte</h4><p>ChatGPT, Claude, Gemini… Ils répondent à des questions, rédigent, synthétisent et traduisent.</p></div></div>
+    <div class="type-cell"><div class="type-ico">🎨</div><div><h4>Générateurs d'images</h4><p>Midjourney, DALL·E… Ils créent des visuels à partir d'une description textuelle.</p></div></div>
+    <div class="type-cell"><div class="type-ico">🎵</div><div><h4>Audio et voix</h4><p>Suno, ElevenLabs… Ils génèrent de la musique ou produisent des voix synthétiques.</p></div></div>
+    <div class="type-cell"><div class="type-ico">📄</div><div><h4>Traitement de documents</h4><p>Résumé de textes, traduction, synthèse de politiques sociales ou de textes réglementaires.</p></div></div>
+  </div>
+
+  <div class="sec-title">Ce que l'IA ne fait pas</div>
+  <div class="callout callout-ind">
+    <div class="c-label">Point essentiel</div>
+    <p><strong>Elle ne connaît pas les personnes que VOUS accompagnez.</strong> L'IA n'a aucune connaissance du jeune que vous suivez en MECS, de la personne en rupture sociale que vous rencontrez au CHRS, ni de la singularité de chaque situation sur votre terrain. Toute réponse qu'elle produit sur une situation est une généralisation statistique — ce n'est pas une analyse clinique ou éducative.</p>
+  </div>
+
+  <div class="accordion-item">
+    <button class="acc-btn" onclick="toggleAcc(this)">Elle ne comprend pas — elle prédit <span class="acc-arrow">▾</span></button>
+    <div class="acc-body"><p>À chaque mot qu'elle génère, l'IA calcule ce qui est statistiquement le plus probable de suivre. Ce n'est pas de la compréhension, c'est de la <strong>prédiction</strong>. C'est pourquoi elle peut produire des réponses plausibles mais fausses — on parle d'<em>hallucinations</em>.</p></div>
+  </div>
+  <div class="accordion-item">
+    <button class="acc-btn" onclick="toggleAcc(this)">Elle reproduit les biais de ses données <span class="acc-arrow">▾</span></button>
+    <div class="acc-body"><p>Entraînée sur des textes produits par des sociétés inégalitaires, l'IA peut reproduire des <strong>stéréotypes de genre, d'origine ou de milieu social</strong>. Dans le champ de la protection de l'enfance ou de l'insertion, ces biais peuvent avoir des effets discriminants sur les personnes accompagnées. (Source : CNIL, fiches IA 2024)</p></div>
+  </div>
+
+  <div class="callout callout-amber">
+    <div class="c-label">⚠ Point de vigilance</div>
+    <p>L'IA n'est pas « intelligente » au sens humain du terme. Elle est performante sur certaines tâches linguistiques, mais elle est <strong>dépourvue de jugement éthique, d'expérience vécue et de posture professionnelle</strong> — tout ce qui est au cœur de votre métier d'ES.</p>
+  </div>
+
+  <div class="sec-title">Pour approfondir</div>
+  <div class="resources">
+    <div class="res-card" onclick="openLink('https://www.fun-mooc.fr/fr/cours/lintelligence-artificielle-avec-intelligence/')">
+      <div class="res-ico mooc">🎓</div>
+      <div class="res-info"><div class="res-title">MOOC Class'Code IAI — L'IA… avec intelligence ! · Module 1</div><div class="res-sub">Inria · FUN MOOC · Gratuit · Accessible à tous</div></div>
+      <span class="res-badge rb-acad">Académique</span>
+    </div>
+    <div class="res-card" onclick="openLink('https://www.cnil.fr/fr/intelligence-artificielle/quelques-ressources-utiles-et-accessibles-tous-pour-comprendre-lintelligence-artificielle-ia')">
+      <div class="res-ico lnk">🔗</div>
+      <div class="res-info"><div class="res-title">CNIL — Ressources pour comprendre l'IA</div><div class="res-sub">Commission Nationale Informatique et Libertés · Fiches pratiques</div></div>
+      <span class="res-badge rb-acad">Institutionnel</span>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-q">Qu'est-ce qu'une « hallucination » dans le contexte d'une IA générative ?</div>
+    <div class="quiz-opts" id="q1">
+      <button class="quiz-opt" onclick="answer(this,'q1',false)">Un dysfonctionnement technique qui bloque le logiciel</button>
+      <button class="quiz-opt" onclick="answer(this,'q1',true)">Une réponse plausible en apparence mais factuellement fausse</button>
+      <button class="quiz-opt" onclick="answer(this,'q1',false)">La capacité de l'IA à analyser des situations complexes</button>
+    </div>
+    <div class="quiz-fb" id="q1-fb"></div>
+  </div>
+
+  <div class="reflect">
+    <div class="reflect-head">💭 Temps de réflexion</div>
+    <div class="reflect-sub">Avez-vous déjà utilisé un outil d'IA ? Lequel ? Dans quel contexte personnel ou professionnel ?</div>
+    <textarea placeholder="Notez vos expériences personnelles avec l'IA…"></textarea>
+  </div>
+
+  <div class="ch-nav"><div></div><button class="btn-nav btn-next" onclick="go(1)">Opportunités ES ›</button></div>
+</div>
+
+<!-- ═══════ CHAPITRE 2 ═══════ -->
+<div class="chapter" id="ch1">
+  <div class="ch-header" style="background:linear-gradient(135deg,#FFF8E1,var(--white));">
+    <div class="ch-num" style="background:var(--amber);box-shadow:0 4px 16px rgba(232,146,10,.4);">2</div>
+    <div class="ch-titles"><h2>Opportunités dans la pratique ES</h2><p>Ce que l'IA peut apporter — et ses limites strictes</p></div>
+  </div>
+
+  <p class="prose">L'IA générative ne peut pas — et ne doit pas — remplacer l'éducateur spécialisé. Votre métier est fondé sur l'<strong>alliance éducative, l'observation clinique et l'engagement éthique</strong>. Elle peut cependant soutenir certaines tâches périphériques et vous libérer du temps pour l'essentiel.</p>
+
+  <div class="callout callout-ind">
+    <div class="c-label">Principe directeur — Réforme 2025</div>
+    <p>Le <strong>Bloc 4 commun</strong> « S'inscrire dans un contexte professionnel du travail social » (arrêté du 6 octobre 2025) intègre les <strong>pratiques numériques et informatiques</strong> dans les compétences professionnelles ES. Savoir mobiliser l'IA de façon critique et éclairée fait partie de votre formation.</p>
+  </div>
+
+  <div class="sec-title">Usages envisageables dans les missions ES</div>
+  <div class="cards">
+    <div class="card"><div class="card-ico" style="background:#EEE9FF;">📝</div><h3>Écrits professionnels</h3><p>Trame de compte rendu, plan de rapport de situation, structure de projet individualisé — toujours à relire et à adapter.</p></div>
+    <div class="card"><div class="card-ico" style="background:#E1F5EE;">🔍</div><h3>Veille documentaire</h3><p>Synthèse de textes législatifs (loi 2002-2, protection de l'enfance), recherche sur des thématiques éducatives ou sociales.</p></div>
+    <div class="card"><div class="card-ico" style="background:#FFF8E1;">🎲</div><h3>Supports d'activité</h3><p>Idées d'ateliers, de médiations éducatives, de supports d'expression pour les publics accompagnés.</p></div>
+    <div class="card"><div class="card-ico" style="background:#FDF0F5;">🤝</div><h3>Communication</h3><p>Traduction de documents pour des familles allophones, supports accessibles pour des personnes en situation de handicap.</p></div>
+  </div>
+
+  <div class="sec-title">🎬 Mise en situation — ES en MECS, atelier d'insertion professionnelle</div>
+  <div class="scenario-wrap">
+    <div class="scenario-head">
+      <span class="sc-tag ok">Situation conforme · ES · MECS</span>
+      <div class="sc-controls">
+        <button class="btn-play" onclick="play('s1')">▶ Lancer</button>
+        <button class="btn-reset" onclick="resetSc('s1')">↺</button>
+        <span class="sc-step" id="s1-c">0 / 4</span>
+      </div>
+    </div>
+    <div class="dialogue" id="s1">
+      <div class="brow" id="s1-0"><div class="av es">ES</div><div><div class="bn">Thomas, ES en MECS</div><div class="bubble bl">Je dois préparer un atelier sur l'orientation professionnelle pour un jeune de 16 ans passionné de cuisine mais qui manque de confiance en lui. Je cherche des idées d'activités concrètes.</div></div></div>
+      <div class="brow r" id="s1-1"><div class="av ia">IA</div><div><div class="bn">Thomas interroge un outil IA — sans donner le prénom du jeune</div><div class="bubble bw">Voici des idées d'ateliers autour de la restauration pour des adolescents en parcours d'insertion : visite de cuisines professionnelles, construction d'un book culinaire, simulation d'entretien pour un CAP cuisine, rencontres avec des professionnels du secteur…</div></div></div>
+      <div class="brow" id="s1-2"><div class="av es">ES</div><div><div class="bn">Thomas co-construit l'atelier</div><div class="bubble bl">À partir de ces pistes, Thomas choisit avec le jeune les activités qui lui correspondent. C'est leur échange — ses envies, ses appréhensions, son histoire — qui façonne le projet, pas l'IA.</div></div></div>
+      <div class="brow" id="s1-3"><div class="av check">✓</div><div><div class="bn">Ce que l'IA a fait — ce que Thomas a assuré</div><div class="bubble bcheck"><strong>L'IA a fourni :</strong> un réservoir d'idées génériques. <strong>Thomas a assuré :</strong> la connaissance du jeune, l'alliance éducative, la co-construction du projet — Bloc 1 ES : accompagnement éducatif spécialisé dans une visée préventive et inclusive.</div></div></div>
+    </div>
+    <div class="analysis" id="s1-a">
+      <h4>Points clés de cette situation</h4>
+      <div class="a-item"><div class="dot-ok"></div><div>Thomas n'a pas donné le prénom ni la situation personnelle du jeune à l'outil IA.</div></div>
+      <div class="a-item"><div class="dot-ok"></div><div>L'IA a généré des ressources génériques, que Thomas a filtrées selon sa connaissance du terrain et du jeune.</div></div>
+      <div class="a-item"><div class="dot-warn"></div><div>Vigilance : ne pas laisser l'IA décider de ce qui « convient » à une personne accompagnée — c'est le rôle de l'éducateur.</div></div>
+    </div>
+  </div>
+
+  <div class="sec-title">🎬 Mise en situation — ES en CHRS, préparation d'une médiation</div>
+  <div class="scenario-wrap">
+    <div class="scenario-head">
+      <span class="sc-tag ok">Situation conforme · ES · Centre d'hébergement et de réinsertion sociale</span>
+      <div class="sc-controls">
+        <button class="btn-play" onclick="play('s2')">▶ Lancer</button>
+        <button class="btn-reset" onclick="resetSc('s2')">↺</button>
+        <span class="sc-step" id="s2-c">0 / 4</span>
+      </div>
+    </div>
+    <div class="dialogue" id="s2">
+      <div class="brow" id="s2-0"><div class="av es">ES</div><div><div class="bn">Laura, ES en CHRS</div><div class="bubble bl">Je dois animer demain un atelier collectif sur la gestion du budget pour cinq résidents. Certains ne maîtrisent pas la lecture. Je cherche des supports visuels simples et accessibles.</div></div></div>
+      <div class="brow r" id="s2-1"><div class="av ia">IA</div><div><div class="bn">Laura interroge un outil IA — sans données sur les résidents</div><div class="bubble bw">Voici des idées de supports pour un atelier budget accessible : tableaux visuels de dépenses avec pictogrammes, jeux de simulation avec de la monnaie fictive, affiches illustrées des postes budgétaires essentiels, fiches de suivi simplifiées…</div></div></div>
+      <div class="brow" id="s2-2"><div class="av es">ES</div><div><div class="bn">Laura adapte les supports</div><div class="bubble bl">Laura sélectionne les outils les plus adaptés au groupe qu'elle connaît, ajuste le niveau de complexité et prépare l'atelier en intégrant les situations concrètes des résidents — sans en parler à l'IA.</div></div></div>
+      <div class="brow" id="s2-3"><div class="av check">✓</div><div><div class="bn">Ce que l'IA a fait — ce que Laura a assuré</div><div class="bubble bcheck"><strong>L'IA a fourni :</strong> des pistes de supports génériques. <strong>Laura a assuré :</strong> l'adaptation au groupe, la relation éducative, la conduite de la médiation — Bloc 2 ES : conception et mise en œuvre de projets éducatifs.</div></div></div>
+    </div>
+    <div class="analysis" id="s2-a">
+      <h4>Points clés de cette situation</h4>
+      <div class="a-item"><div class="dot-ok"></div><div>Aucune information personnelle sur les résidents n'a été transmise à l'outil IA.</div></div>
+      <div class="a-item"><div class="dot-ok"></div><div>L'IA a fourni une banque d'idées génériques ; l'adaptation pédagogique et la conduite de l'atelier restent l'expertise de Laura.</div></div>
+      <div class="a-item"><div class="dot-warn"></div><div>Vigilance : l'accessibilité réelle des supports doit être évaluée par l'éducateur qui connaît son groupe, pas par l'algorithme.</div></div>
+    </div>
+  </div>
+
+  <div class="sec-title">🎙 Ressource audio</div>
+  <div class="resources">
+    <div class="res-card" onclick="openLink('https://open.spotify.com/show/3qTZT9ziPWEt5Khuu1imNO')">
+      <div class="res-ico pod">🎙</div>
+      <div class="res-info"><div class="res-title">Podcast — Nouvelle ère · Le travail social à l'ère du numérique</div><div class="res-sub">HETSL Lausanne · Produit par des étudiant·e·s en Bachelor Travail Social · Spotify · Gratuit</div></div>
+      <span class="res-badge rb-acad">Académique</span>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-q">Dans la mise en situation de Thomas, pourquoi n'a-t-il pas donné le prénom du jeune à l'outil IA ?</div>
+    <div class="quiz-opts" id="q2">
+      <button class="quiz-opt" onclick="answer(this,'q2',false)">Pour que la requête soit plus simple à formuler</button>
+      <button class="quiz-opt" onclick="answer(this,'q2',true)">Pour protéger les données personnelles d'un mineur confié à la MECS</button>
+      <button class="quiz-opt" onclick="answer(this,'q2',false)">Parce que l'IA fonctionne mieux avec des requêtes génériques</button>
+    </div>
+    <div class="quiz-fb" id="q2-fb"></div>
+  </div>
+
+  <div class="reflect">
+    <div class="reflect-head">💭 Réflexion professionnelle</div>
+    <div class="reflect-sub">Dans votre futur terrain de stage ES, identifiez une tâche où l'IA pourrait vous aider — et expliquez ce que vous ne lui délègueriez pas.</div>
+    <textarea placeholder="Contexte de stage, tâche déléguable / non déléguable à l'IA…"></textarea>
+  </div>
+
+  <div class="ch-nav">
+    <button class="btn-nav btn-prev" onclick="go(0)">‹ Précédent</button>
+    <button class="btn-nav btn-next" onclick="go(2)">Risques éthiques ›</button>
+  </div>
+</div>
+
+<!-- ═══════ CHAPITRE 3 ═══════ -->
+<div class="chapter" id="ch2">
+  <div class="ch-header" style="background:linear-gradient(135deg,var(--coral-light),var(--white));">
+    <div class="ch-num" style="background:var(--coral);box-shadow:0 4px 16px rgba(232,83,58,.4);">3</div>
+    <div class="ch-titles"><h2>Enjeux éthiques et déontologiques</h2><p>Les limites incontournables dans le champ du social</p></div>
+  </div>
+
+  <p class="prose">Le travail de l'ES repose sur des valeurs fondamentales : <strong>dignité de la personne, confidentialité, non-jugement, bientraitance, respect de l'autodétermination</strong>. L'usage de l'IA peut entrer en tension directe avec ces valeurs. Les identifier est une compétence professionnelle à part entière.</p>
+
+  <div class="callout callout-coral">
+    <div class="c-label">🔒 Données personnelles et secret professionnel</div>
+    <p>Tout ce que vous entrez dans un outil IA public peut être stocké sur des serveurs hors de l'Union européenne. <strong>Il ne faut jamais saisir d'informations permettant d'identifier une personne accompagnée.</strong> Le secret professionnel, prévu par l'article 226-13 du Code pénal, s'applique aussi aux outils numériques. (Source : CNIL, recommandations IA 2024)</p>
+  </div>
+  <div class="callout callout-coral">
+    <div class="c-label">⚖ Biais algorithmiques et discriminations</div>
+    <p>Les modèles d'IA reproduisent les inégalités de leurs données d'entraînement. Ils peuvent <strong>associer des profils défavorisés à des représentations stéréotypées</strong> : famille monoparentale, précarité, migration, handicap. Dans le champ de la protection de l'enfance ou de l'insertion, ces biais ont des conséquences concrètes sur les personnes accompagnées. (Source : CNIL, fiches IA sur les biais)</p>
+  </div>
+
+  <div class="sec-title">🎬 Cas à analyser — ES en IME et rapport de situation</div>
+  <div class="scenario-wrap">
+    <div class="scenario-head">
+      <span class="sc-tag warn">Situation problématique · ES · Institut Médico-Éducatif</span>
+      <div class="sc-controls">
+        <button class="btn-play" onclick="play('s3')">▶ Dérouler</button>
+        <button class="btn-reset" onclick="resetSc('s3')">↺</button>
+        <span class="sc-step" id="s3-c">0 / 5</span>
+      </div>
+    </div>
+    <div class="dialogue" id="s3">
+      <div class="brow" id="s3-0"><div class="av es">ES</div><div><div class="bn">Laure, ES en IME — en fin de journée</div><div class="bubble bl">Je dois rendre demain le rapport de situation de mon suivi. Je suis épuisée. Je vais demander à ChatGPT de me le rédiger.</div></div></div>
+      <div class="brow r" id="s3-1"><div class="av ia">IA</div><div><div class="bn">Laure tape dans ChatGPT</div><div class="bubble ba">« Rédige un rapport de situation pour Mathis, 11 ans, en IME, difficultés relationnelles, retard scolaire, famille monoparentale en précarité. »</div></div></div>
+      <div class="brow" id="s3-2"><div class="av warn">⚠</div><div><div class="bn">Problème 1 — Données personnelles</div><div class="bubble bl">Le prénom, l'âge, le lieu d'accueil et la situation familiale de l'enfant sont des <strong>données personnelles sensibles</strong>. Leur transmission à un outil tiers non sécurisé constitue une violation du secret professionnel.</div></div></div>
+      <div class="brow" id="s3-3"><div class="av warn">⚠</div><div><div class="bn">Problème 2 — Biais et stéréotypes</div><div class="bubble bl">L'IA peut associer « famille monoparentale précaire » à des représentations stéréotypées. Le rapport produit risque de ne pas refléter la singularité de l'enfant — voire de le stigmatiser.</div></div></div>
+      <div class="brow" id="s3-4"><div class="av warn">⚠</div><div><div class="bn">Problème 3 — Responsabilité professionnelle</div><div class="bubble bl">Laure signe un rapport qu'elle n'a pas entièrement rédigé, issu d'une IA qui peut « halluciner ». Elle en est <strong>pleinement responsable</strong> sur le plan légal et déontologique.</div></div></div>
+    </div>
+    <div class="analysis" id="s3-a">
+      <h4>Ce que Laure aurait pu faire à la place</h4>
+      <div class="a-item"><div class="dot-ok"></div><div>Demander à l'IA un plan de rapport vierge avec les rubriques à renseigner — sans aucune donnée sur l'enfant.</div></div>
+      <div class="a-item"><div class="dot-ok"></div><div>Utiliser l'IA pour améliorer la formulation d'un paragraphe déjà rédigé, sans données identifiantes.</div></div>
+      <div class="a-item"><div class="dot-warn"></div><div>Parler à sa cheffe de service de sa surcharge plutôt que de trouver un raccourci risqué.</div></div>
+    </div>
+  </div>
+
+  <div class="sec-title">🎬 Cas à analyser — ES en service de protection de l'enfance</div>
+  <div class="scenario-wrap">
+    <div class="scenario-head">
+      <span class="sc-tag warn">Situation problématique · ES · Protection de l'enfance</span>
+      <div class="sc-controls">
+        <button class="btn-play" onclick="play('s4')">▶ Dérouler</button>
+        <button class="btn-reset" onclick="resetSc('s4')">↺</button>
+        <span class="sc-step" id="s4-c">0 / 5</span>
+      </div>
+    </div>
+    <div class="dialogue" id="s4">
+      <div class="brow" id="s4-0"><div class="av es">ES</div><div><div class="bn">Romain, ES en service de protection de l'enfance</div><div class="bubble bl">J'ai une réunion de synthèse dans une heure sur la situation d'une famille que je suis depuis six mois. Je dois préparer une évaluation des compétences parentales. Je vais demander à l'IA.</div></div></div>
+      <div class="brow r" id="s4-1"><div class="av ia">IA</div><div><div class="bn">Romain tape dans un outil IA</div><div class="bubble ba">« Évalue les compétences parentales de Samir, 38 ans, et Leila, 34 ans, parents de trois enfants de 4, 7 et 10 ans. Antécédents de violences conjugales, père incarcéré 18 mois, mère isolée, logement précaire, enfants signalés pour négligences. »</div></div></div>
+      <div class="brow" id="s4-2"><div class="av warn">⚠</div><div><div class="bn">Problème 1 — Données ultra-sensibles</div><div class="bubble bl">Les informations saisies constituent des <strong>données judiciaires et des données de protection de l'enfance</strong> d'une particulière sensibilité. Leur transmission à un outil tiers non sécurisé est une faute professionnelle grave.</div></div></div>
+      <div class="brow" id="s4-3"><div class="av warn">⚠</div><div><div class="bn">Problème 2 — Évaluation clinique impossible</div><div class="bubble bl">L'évaluation des compétences parentales est une tâche clinique complexe qui mobilise l'observation directe, la relation de confiance et l'analyse pluriprofessionnelle sur plusieurs mois. <strong>Aucun algorithme ne peut se substituer à ce travail.</strong></div></div></div>
+      <div class="brow" id="s4-4"><div class="av warn">⚠</div><div><div class="bn">Problème 3 — Conséquences réelles pour la famille</div><div class="bubble bl">Une évaluation baisée par les stéréotypes de l'IA — sur l'origine, la précarité, l'incarcération — peut influencer une décision de placement. L'enjeu pour cette famille est direct et irréversible.</div></div></div>
+    </div>
+    <div class="analysis" id="s4-a">
+      <h4>Ce que Romain aurait pu faire à la place</h4>
+      <div class="a-item"><div class="dot-ok"></div><div>Utiliser l'IA pour rechercher des grilles d'évaluation des compétences parentales existantes dans la littérature professionnelle — de façon générique, sans données sur la famille.</div></div>
+      <div class="a-item"><div class="dot-ok"></div><div>Préparer la réunion en s'appuyant sur ses propres notes d'observation, construites sur six mois de suivi.</div></div>
+      <div class="a-item"><div class="dot-warn"></div><div>Si le temps manque, solliciter un report de réunion auprès de son coordinateur plutôt que de prendre un raccourci éthiquement inacceptable.</div></div>
+    </div>
+  </div>
+
+  <div class="sec-title">🧪 Expérimenter les biais et hallucinations avec Comparia</div>
+  <div class="comparia">
+    <div class="comp-head">
+      <div class="comp-ico">🧪</div>
+      <div><h3>Comparia — Comparer les IA pour comprendre leurs limites</h3><p>Outil public · beta.gouv.fr · Gratuit · Sans compte</p></div>
+    </div>
+    <p class="comp-intro">Comparia est un outil développé par l'État français qui vous permet de soumettre une même question à plusieurs IA simultanément et de comparer leurs réponses. C'est un moyen concret d'observer les biais, les hallucinations et les divergences entre modèles.</p>
+    <div class="comp-prompt">
+      <div class="comp-plabel">Situation à tester — ES</div>
+      <p>« Un adolescent de 15 ans en MECS refuse toute scolarisation depuis trois mois. Sa famille est d'origine étrangère et ne comprend pas l'institution. Il a des antécédents de fugues. Quelles en sont les causes probables et que recommandez-vous ? »</p>
+    </div>
+    <a class="comp-btn" href="https://comparia.beta.gouv.fr/" target="_blank">🔗 Ouvrir Comparia</a>
+    <p class="comp-consigne"><strong>Consigne d'analyse :</strong> observez si les IA attribuent les difficultés à la famille ou à l'origine culturelle. Quelles inférences font-elles sans connaissance du contexte ? Y a-t-il des divergences entre les modèles ? Que révèle cela sur les biais présents dans leurs données d'entraînement ?</p>
+  </div>
+
+  <div class="sec-title">🔗 Ressources institutionnelles</div>
+  <div class="resources">
+    <div class="res-card" onclick="openLink('https://www.cnil.fr/fr/intelligence-artificielle')">
+      <div class="res-ico lnk">🔗</div>
+      <div class="res-info"><div class="res-title">CNIL — Dossier IA complet et webinaires</div><div class="res-sub">Recommandations RGPD × IA · Fiches pratiques gratuites</div></div>
+      <span class="res-badge rb-acad">Institutionnel</span>
+    </div>
+  </div>
+
+  <div class="sec-title">Cadre réglementaire essentiel</div>
+  <table class="data-table">
+    <thead><tr><th>Texte de référence</th><th>Ce qu'il implique pour l'ES</th></tr></thead>
+    <tbody>
+      <tr><td>RGPD (2018)</td><td>Protection des données personnelles des personnes accompagnées. La transmission de données identifiantes à des outils tiers non sécurisés est interdite.</td></tr>
+      <tr><td>Règlement européen sur l'IA — AI Act (2024)</td><td>Les usages d'IA dans l'évaluation sociale ou le profilage de personnes vulnérables sont classés à haut risque. Applicable progressivement jusqu'en 2027.</td></tr>
+      <tr><td>Secret professionnel (art. 226-13 CP)</td><td>Le partage d'informations confidentielles avec un outil IA tiers, sans cadre légal, constitue une faute professionnelle et pénale.</td></tr>
+      <tr><td>Code de déontologie du travail social</td><td>Obligation de respecter la dignité, la singularité et l'autodétermination des personnes. L'IA ne peut jamais se substituer au jugement professionnel.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="quiz">
+    <div class="quiz-q">Quelle pratique est acceptable avec une IA pour préparer un écrit professionnel ?</div>
+    <div class="quiz-opts" id="q3">
+      <button class="quiz-opt" onclick="answer(this,'q3',false)">Saisir le prénom, l'âge et la situation familiale pour que l'IA personnalise le document</button>
+      <button class="quiz-opt" onclick="answer(this,'q3',true)">Demander à l'IA un plan de rapport vierge avec les rubriques à renseigner</button>
+      <button class="quiz-opt" onclick="answer(this,'q3',false)">Confier l'évaluation de la situation à l'IA et valider le résultat sans relecture</button>
+    </div>
+    <div class="quiz-fb" id="q3-fb"></div>
+  </div>
+
+  <div class="ch-nav">
+    <button class="btn-nav btn-prev" onclick="go(1)">‹ Précédent</button>
+    <button class="btn-nav btn-next" onclick="go(3)">Posture professionnelle ›</button>
+  </div>
+</div>
+
+<!-- ═══════ CHAPITRE 4 ═══════ -->
+<div class="chapter" id="ch3">
+  <div class="ch-header" style="background:linear-gradient(135deg,var(--teal-light),var(--white));">
+    <div class="ch-num" style="background:var(--teal);box-shadow:0 4px 16px rgba(11,107,84,.4);">4</div>
+    <div class="ch-titles"><h2>Adopter une posture professionnelle éclairée</h2><p>Une posture en construction chez l'étudiant·e ES</p></div>
+  </div>
+
+  <p class="prose">Face à l'IA, deux écueils sont à éviter : le <strong>techno-enthousiasme naïf</strong> — croire que l'IA résout tout — et le <strong>rejet par principe</strong> — refuser d'y réfléchir. La posture professionnelle consiste à évaluer de façon critique et contextuelle. C'est une aptitude déjà au cœur du travail social, et qui se construit tout au long de la formation pour l'étudiant·e ES.</p>
+
+  <div class="sec-title">Les 4 questions à se poser avant d'utiliser une IA</div>
+  <div class="blocs">
+    <div class="bloc"><div class="bloc-num">Question 1</div><h4>La tâche est-elle délégable ?</h4><p>S'agit-il d'une tâche administrative ou de recherche, ou d'une tâche clinique, relationnelle ou éthique ?</p></div>
+    <div class="bloc"><div class="bloc-num">Question 2</div><h4>Y a-t-il des données sensibles ?</h4><p>Est-ce que je m'apprête à saisir des données permettant d'identifier une personne accompagnée ?</p></div>
+    <div class="bloc"><div class="bloc-num">Question 3</div><h4>Vais-je vérifier le résultat ?</h4><p>Suis-je en mesure de relire, corriger et assumer la responsabilité de ce que l'IA produit ?</p></div>
+    <div class="bloc"><div class="bloc-num">Question 4</div><h4>Mon institution le permet-elle ?</h4><p>Mon établissement dispose-t-il d'une charte sur l'usage des outils numériques et de l'IA ?</p></div>
+  </div>
+
+  <div class="sec-title">Ancrage dans les blocs de compétences — Réforme ES 2025</div>
+  <div class="callout callout-ind">
+    <div class="c-label">Bloc 4 ES — S'inscrire dans un contexte professionnel du travail social</div>
+    <p>Le référentiel ES (arrêté du 6 octobre 2025) intègre la capacité à <strong>mobiliser les outils numériques de façon éthique et réflexive</strong> et à <strong>s'inscrire dans un cadre légal et réglementaire</strong> dans l'exercice professionnel. Analyser l'usage de l'IA de façon critique, c'est déjà exercer cette compétence.</p>
+  </div>
+  <div class="callout callout-teal">
+    <div class="c-label">Bloc 3 ES — S'inscrire dans une dynamique partenariale et territoriale</div>
+    <p>Les politiques de cohésion sociale et les dispositifs territoriaux intègrent de plus en plus d'outils numériques. Savoir <strong>questionner ces outils, repérer leurs biais, défendre les droits des personnes accompagnées et s'inscrire dans le cadre légal qui régit ces usages</strong> fait partie intégrante de votre rôle partenarial.</p>
+  </div>
+
+  <div class="sec-title">Ce qui restera toujours humain dans le métier d'ES</div>
+  <ul class="sl">
+    <li><strong>L'alliance éducative</strong> — la confiance, la relation inconditionnelle, la présence émotionnelle.</li>
+    <li><strong>L'observation clinique</strong> — lire une posture, un silence, une dynamique de groupe, une interaction familiale.</li>
+    <li><strong>L'évaluation de la singularité</strong> — chaque situation est unique et irréductible à un algorithme.</li>
+    <li><strong>L'engagement éthique</strong> — défendre les droits, la dignité et l'autodétermination des personnes accompagnées.</li>
+    <li><strong>Le travail pluriprofessionnel</strong> — la coordination d'équipe, la supervision, le débat éthique collectif.</li>
+    <li><strong>La médiation éducative</strong> — conduire un entretien, animer une réunion, accompagner une crise.</li>
+  </ul>
+
+  <div class="sec-title">🎙 Ressources audio — témoignages de terrain</div>
+  <div class="resources">
+    <div class="res-card" onclick="openLink('https://podcasts.apple.com/us/podcast/les-voix-du-social/id1577533620')">
+      <div class="res-ico pod">🎙</div>
+      <div class="res-info"><div class="res-title">Les Voix du Social — Témoignages d'éducateurs spécialisés et de travailleurs sociaux</div><div class="res-sub">Le Média Social · Apple Podcasts / Spotify · ~10 min par épisode</div></div>
+      <span class="res-badge rb-pro">Professionnel</span>
+    </div>
+    <div class="res-card" onclick="openLink('https://podcasts.apple.com/fr/podcast/le-podcast-des-%C3%A9tablissements-m%C3%A9dico-sociaux/id1513857315')">
+      <div class="res-ico pod">🎙</div>
+      <div class="res-info"><div class="res-title">Le Podcast des Établissements Médico-Sociaux — IA et éthique clinique</div><div class="res-sub">Posture professionnelle face à l'IA · Approche critique et nuancée</div></div>
+      <span class="res-badge rb-pro">Professionnel</span>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-q">Dans votre pratique ES, laquelle de ces tâches peut être soutenue par une IA de façon responsable ?</div>
+    <div class="quiz-opts" id="q4">
+      <button class="quiz-opt" onclick="answer(this,'q4',false)">Évaluer les compétences parentales d'une famille suivie en protection de l'enfance</button>
+      <button class="quiz-opt" onclick="answer(this,'q4',true)">Rechercher des idées d'activités de médiation éducative pour un atelier avec des adolescents</button>
+      <button class="quiz-opt" onclick="answer(this,'q4',false)">Rédiger un rapport de synthèse en y saisissant les informations personnelles d'un jeune</button>
+    </div>
+    <div class="quiz-fb" id="q4-fb"></div>
+  </div>
+
+  <div class="reflect">
+    <div class="reflect-head">💭 Engagement réflexif</div>
+    <div class="reflect-sub">Rédigez votre propre charte personnelle d'usage de l'IA dans votre future pratique ES.</div>
+    <textarea style="min-height:100px;" placeholder="J'utiliserai l'IA pour… / Je n'utiliserai pas l'IA pour… / Avant d'utiliser l'IA, je vérifierai que…"></textarea>
+  </div>
+
+  <div class="ch-nav">
+    <button class="btn-nav btn-prev" onclick="go(2)">‹ Précédent</button>
+    <button class="btn-nav btn-next" onclick="go(4)">Bilan final ›</button>
+  </div>
+</div>
+
+<!-- ═══════ CHAPITRE 5 ═══════ -->
+<div class="chapter" id="ch4">
+  <div class="ch-header" style="background:linear-gradient(135deg,var(--teal-light),var(--white));">
+    <div class="ch-num" style="background:var(--teal);box-shadow:0 4px 16px rgba(11,107,84,.4);">5</div>
+    <div class="ch-titles"><h2>Bilan et synthèse</h2><p>Ce que vous avez appris et vos prochaines étapes</p></div>
+  </div>
+
+  <div class="score-area">
+    <div class="score-ring">
+      <svg viewBox="0 0 42 42"><circle class="score-bg" cx="21" cy="21" r="15.9"/><circle class="score-fg" id="sc-ring" cx="21" cy="21" r="15.9"/></svg>
+      <div class="score-inner"><div class="score-num" id="sc-num">—</div><div class="score-den">/ 4</div></div>
+    </div>
+    <p class="score-msg" id="sc-msg">Terminez les questions dans les chapitres précédents pour voir votre score.</p>
+  </div>
+
+  <hr style="border:none;border-top:1px solid var(--gray-100);margin:1.5rem 0;">
+
+  <div class="sec-title">Ce que vous devez retenir — ES</div>
+  <div>
+    <div class="synth-item"><div class="synth-dot"></div><div>L'IA prédit statistiquement — elle ne connaît pas les personnes que vous accompagnez.</div></div>
+    <div class="synth-item"><div class="synth-dot"></div><div>Elle peut soutenir des <strong>tâches périphériques</strong> (idées d'activités, trames de documents, veille documentaire) — jamais l'évaluation clinique ni la relation éducative.</div></div>
+    <div class="synth-item"><div class="synth-dot"></div><div>Il ne faut <strong>jamais saisir de données personnelles</strong> sur les personnes accompagnées dans un outil IA public — secret professionnel et RGPD.</div></div>
+    <div class="synth-item"><div class="synth-dot"></div><div>Les biais algorithmiques peuvent <strong>discriminer des publics déjà fragilisés</strong> — la vigilance éthique est une obligation professionnelle.</div></div>
+    <div class="synth-item"><div class="synth-dot"></div><div>La <strong>responsabilité professionnelle</strong> reste entière même si l'IA a participé à la production d'un document.</div></div>
+    <div class="synth-item"><div class="synth-dot"></div><div>La réforme 2025 fait de l'<strong>usage éthique et réflexif du numérique un élément du Bloc 4</strong> ES — c'est une compétence professionnelle certifiée.</div></div>
+  </div>
+
+  <div class="sec-title" style="margin-top:2rem;">Toutes les ressources du module</div>
+  <div class="resources">
+    <div class="res-card" onclick="openLink('https://www.youtube.com/watch?v=yQLmgw3rClM')"><div class="res-ico vid">▶️</div><div class="res-info"><div class="res-title">Vidéo — C'est quoi l'IA ? · Class'Code · YouTube</div><div class="res-sub">Chapitre 1 · ~8 min</div></div><span class="res-badge rb-acad">Académique</span></div>
+    <div class="res-card" onclick="openLink('https://www.fun-mooc.fr/fr/cours/lintelligence-artificielle-avec-intelligence/')"><div class="res-ico mooc">🎓</div><div class="res-info"><div class="res-title">MOOC Class'Code IAI — Inria · FUN MOOC</div><div class="res-sub">Gratuit · Chapitres 1 et 2</div></div><span class="res-badge rb-acad">Académique</span></div>
+    <div class="res-card" onclick="openLink('https://www.cnil.fr/fr/intelligence-artificielle')"><div class="res-ico lnk">🔗</div><div class="res-info"><div class="res-title">CNIL — Dossier IA et webinaires</div><div class="res-sub">Gratuit · Chapitre 3</div></div><span class="res-badge rb-acad">Institutionnel</span></div>
+    <div class="res-card" onclick="openLink('https://comparia.beta.gouv.fr/')"><div class="res-ico tool">🧪</div><div class="res-info"><div class="res-title">Comparia — Comparer les IA pour observer les biais</div><div class="res-sub">beta.gouv.fr · Gratuit · Chapitre 3</div></div><span class="res-badge rb-tool">Outil</span></div>
+    <div class="res-card" onclick="openLink('https://open.spotify.com/show/3qTZT9ziPWEt5Khuu1imNO')"><div class="res-ico pod">🎙</div><div class="res-info"><div class="res-title">Podcast HETSL Lausanne — Travail social et numérique</div><div class="res-sub">Spotify · Chapitres 2 et 4</div></div><span class="res-badge rb-acad">Académique</span></div>
+    <div class="res-card" onclick="openLink('https://podcasts.apple.com/us/podcast/les-voix-du-social/id1577533620')"><div class="res-ico pod">🎙</div><div class="res-info"><div class="res-title">Les Voix du Social — Le Média Social</div><div class="res-sub">Apple Podcasts · Chapitre 4</div></div><span class="res-badge rb-pro">Professionnel</span></div>
+  </div>
+
+  <div class="accordion-item" style="margin-top:1rem;">
+    <button class="acc-btn" onclick="toggleAcc(this)">Questions pour la discussion en TD ou groupe de pairs <span class="acc-arrow">▾</span></button>
+    <div class="acc-body">
+      <p>1. Votre structure de stage dispose-t-elle d'une charte sur l'usage des outils numériques et de l'IA ? En avez-vous parlé avec votre maître de stage ?</p>
+      <p>2. Dans les situations de Laure et de Romain, qu'est-ce qui aurait pu avoir des conséquences directes sur les personnes accompagnées si la démarche n'avait pas été questionnée ?</p>
+      <p>3. Comment l'IA pourrait-elle à la fois être un outil d'inclusion (accessibilité, traduction) et un facteur d'exclusion pour certains publics accompagnés en travail social ?</p>
+      <p>4. En quoi la posture réflexive attendue dans le référentiel ES 2025 s'applique-t-elle particulièrement à la question de l'IA ?</p>
+    </div>
+  </div>
+
+  <div class="callout callout-ind" style="margin-top:1.5rem;">
+    <div class="c-label">🎓 Compétences travaillées — Référentiel ES · Réforme octobre 2025</div>
+    <p>En complétant ce module, vous avez travaillé des éléments du <strong>Bloc 4</strong> du référentiel ES : pratiques numériques éthiques et réflexives, cadre légal et déontologique, protection des droits des personnes accompagnées dans les environnements numériques.</p>
+  </div>
+
+  <div class="ch-nav">
+    <button class="btn-nav btn-prev" onclick="go(3)">‹ Précédent</button>
+    <button class="btn-nav btn-next" onclick="restart()">↺ Recommencer</button>
+  </div>
+</div>
+</div>
+
+<script>
+const QA={
+  q1:{ok:"Exact. Une hallucination, c'est une réponse plausible mais factuellement fausse que l'IA produit sans le signaler. C'est l'un des risques majeurs pour les écrits professionnels. (Inria, Class'Code IAI)",ko:"Pas tout à fait. Une hallucination désigne une réponse plausible mais fausse. L'IA invente sans signaler qu'elle invente — d'où la nécessité de toujours vérifier."},
+  q2:{ok:"Exactement. Même sans nom de famille, le prénom d'un mineur confié à une MECS constitue une donnée personnelle protégée par le secret professionnel et le RGPD.",ko:"La bonne réponse est la protection des données. Le prénom d'un mineur confié à une institution est une donnée personnelle couverte par le secret professionnel."},
+  q3:{ok:"Correct. Demander une trame vierge est un usage responsable — aucune donnée identifiante, l'outil sert uniquement à la structuration. Le contenu professionnel reste entièrement à votre charge.",ko:"Attention : saisir des données sur les personnes accompagnées viole le secret professionnel. Valider sans relecture engage votre responsabilité. L'usage correct est de demander une structure vierge."},
+  q4:{ok:"Tout à fait. Rechercher des idées d'activités sans données personnelles est un usage pertinent et conforme. L'adaptation au groupe et la conduite de l'atelier restent votre expertise professionnelle.",ko:"Évaluer des compétences parentales ou saisir des informations sur des personnes accompagnées via une IA publique posent des problèmes éthiques et légaux majeurs. La recherche d'idées d'activités génériques est l'usage le plus adapté."}
+};
+const answers={q1:null,q2:null,q3:null,q4:null};
+const SC={s1:{total:4},s2:{total:4},s3:{total:5},s4:{total:5}};
+const state={s1:0,s2:0,s3:0,s4:0};
+
+function answer(btn,qid,ok){
+  if(answers[qid]!==null)return;
+  answers[qid]=ok;
+  document.getElementById(qid).querySelectorAll('.quiz-opt').forEach(b=>b.classList.add('disabled'));
+  btn.classList.add(ok?'correct':'wrong');
+  const fb=document.getElementById(qid+'-fb');
+  fb.textContent=(ok?'✓ ':'✗ ')+QA[qid][ok?'ok':'ko'];
+  fb.className='quiz-fb show '+(ok?'ok':'ko');
+}
+function play(id){
+  const s=state[id],tot=SC[id].total;
+  if(s<tot){
+    document.getElementById(id+'-'+s).classList.add('visible');
+    state[id]++;
+    document.getElementById(id+'-c').textContent=state[id]+' / '+tot;
+    if(state[id]===tot)setTimeout(()=>document.getElementById(id+'-a').classList.add('show'),600);
+  }
+}
+function resetSc(id){
+  const tot=SC[id].total;
+  state[id]=0;
+  for(let i=0;i<tot;i++){const el=document.getElementById(id+'-'+i);if(el)el.classList.remove('visible');}
+  const a=document.getElementById(id+'-a');if(a)a.classList.remove('show');
+  document.getElementById(id+'-c').textContent='0 / '+tot;
+}
+function go(n){
+  document.querySelectorAll('.chapter').forEach(c=>c.classList.remove('active'));
+  document.getElementById('ch'+n).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>{b.classList.remove('active','done');if(i<n)b.classList.add('done');});
+  document.querySelectorAll('.nav-btn')[n].classList.add('active');
+  document.getElementById('pbar').style.width=((n+1)/5*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n===4)renderScore();
+}
+function renderScore(){
+  const sc=Object.values(answers).filter(v=>v===true).length;
+  const ans=Object.values(answers).filter(v=>v!==null).length;
+  const el=document.getElementById('sc-num');
+  const msg=document.getElementById('sc-msg');
+  const ring=document.getElementById('sc-ring');
+  if(ans===0){el.textContent='—';msg.textContent='Terminez les questions dans les chapitres précédents pour voir votre score.';return;}
+  el.textContent=sc+'/'+ans;
+  const circ=339;
+  ring.style.strokeDashoffset=circ-(circ*(ans>0?sc/ans:0));
+  if(sc===4)msg.textContent='Excellent ! Vous avez répondu correctement à toutes les questions. Vous maîtrisez les fondamentaux éthiques et professionnels ES.';
+  else if(sc>=3)msg.textContent='Très bien ! Relisez les points où vous avez hésité — notamment sur la protection des données des personnes accompagnées.';
+  else msg.textContent="N'hésitez pas à reprendre les chapitres précédents pour consolider vos acquis.";
+}
+function toggleAcc(btn){btn.classList.toggle('open');btn.nextElementSibling.classList.toggle('open');}
+function openLink(u){window.open(u,'_blank');}
+function restart(){
+  Object.keys(answers).forEach(k=>answers[k]=null);
+  ['q1','q2','q3','q4'].forEach(q=>{
+    const g=document.getElementById(q);
+    if(g)g.querySelectorAll('.quiz-opt').forEach(b=>b.className='quiz-opt');
+    const fb=document.getElementById(q+'-fb');
+    if(fb){fb.className='quiz-fb';fb.textContent='';}
+  });
+  document.querySelectorAll('textarea').forEach(t=>t.value='');
+  document.querySelectorAll('.acc-btn').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('.acc-body').forEach(b=>b.classList.remove('open'));
+  ['s1','s2','s3','s4'].forEach(resetSc);
+  go(0);
+}
+</script>
+</body>
+</html>
